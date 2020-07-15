@@ -50,11 +50,170 @@ class Overview extends Component {
       nbPOS:0
     };
   }
+
+  synchronisation = async(navigation) => {
+
+   await  AsyncStorage.getItem('PosUser', (err, res) => {
+
+       AsyncStorage.getItem('PosUser', (err, result) => {
+         result=JSON.stringify(result)
+          result=JSON.parse(result)
+          console.log(result)
+
+            if (result !== null) {
+                console.log(result)
+                result = '[' + result + ']'
+                var obj = JSON.parse(result)
+                obj.forEach(element => {
+                 
+                    axios({
+                            method: 'post',
+                            url: 'https://assurtous.ci:50970/register',
+                            data: element
+                        })
+                        .then(function(response) {
+                             console.log(response)
+                            if (response.data.message == "succes") {
+
+                                Toast.show('votre synchronisation a reussi!!');
+
+                            } else {
+
+                                console.log(response.data.message);
+
+                            }
+
+                        })
+                        .catch(function(error) {
+                            console.log(error);
+                        });
+                });
+
+            } else {
+
+
+
+            }
+        });
+
+
+        /*  AsyncStorage.getItem('StoreDocument', (err, result) => {
+     if (result !== null) {
+       console.log(result)
+       result='['+result+']'
+       var obj=JSON.parse(result)
+       obj.forEach(element => {
+           
+           axios({
+             method: 'post',
+             url:  'http://192.168.43.218:3000/dis/api/upload',
+             data: element
+           })
+           .then(function (response) {
+                 console.log(response)
+                 if(response.data.message=="succes"){
+       
+                 Toast.show('votre synchronisation a reussi!!');
+                      
+                  }else{
+
+                   console.log(response.data.message); 
+                
+                  cd 
+                   }
+              
+           })  
+           .catch(function (error) {
+             console.log(error);
+           });
+         });
+      
+    }else {
+
+
+
+   }
+  });*/
+
+
+    /*    AsyncStorage.getItem('Dis', (err, result) => {
+            if (result !== null) {
+                result = '[' + result + ']'
+                var obj = JSON.parse(result)
+                obj.forEach(element => {
+
+                    console.log(element)
+                    axios({
+                            method: 'post',
+                            url: 'http://192.168.43.218:3000/dis',
+                            data: element
+                        })
+                        .then(function(response) {
+                            console.log(response)
+                            if (response.data.message == "succes") {
+
+                                Toast.show('votre synchronisation a reussi!!');
+
+                            } else {
+
+                                console.log(response.data.message);
+                            }
+
+                        })
+                        .catch(function(error) {
+                            console.log(error);
+                        });
+                });
+
+            } else {
+
+
+
+            }
+        });*/
+
+    });
+
+
+
+}
  
   
-  getData= async(navigation)=> { 
+  getData= async()=> { 
    
-    await AsyncStorage.getItem('Dis', (err, result) => {
+    AsyncStorage.getItem('PosUser', (err, result) => {
+
+    result=JSON.parse(result)
+    axios.get('https://assurtous.ci:50970/dis/list', {
+     
+    })
+    .then( (response)=> {
+     
+         var res= response.data
+      var el=res.Distributor
+      if(el.length > 0 && typeof(el)!== undefined && el !==[null]){
+      el.forEach(element => {
+        
+        if(element.agentTerrain==result.phone){
+         
+
+            if(element.typePos=='POS'){
+              console.log(element) 
+            
+          
+            this.setState({nbPOS:this.state.nbPOS+1});
+            }else if(element.typePos=='PosInd'||element.typePos=='Dis'){
+       
+       this.setState({ nbDIS:this.state.nbDIS+1 });
+            }
+          
+        }
+      });
+    }
+    })
+})
+
+  /*  await AsyncStorage.getItem('Dis', (err, result) => {
    var  bin='['+result+']'
   // AsyncStorage.removeItem('Dis');
  
@@ -78,15 +237,15 @@ class Overview extends Component {
       }
 
     }
-     }); 
+     });
     }
         });
-   
+   */
      }
 
      componentDidMount(){
        this.getData()
-       console.log(this.state.nbDIS)
+       this.synchronisation()
      }
 
   static navigationOptions = {
@@ -117,7 +276,7 @@ class Overview extends Component {
           
 
            <Card
-            title="VOS STATISTIQUES"
+            title="MES STATISTIQUES"
             style={[styles.margin, { marginTop: 18,borderRadius: 20 }]}
           >
          
@@ -126,32 +285,33 @@ class Overview extends Component {
     <Text h2 light>{this.state.nbPOS}</Text>
                 <Block row center>
                   <Label blue />
-                  <Text paragraph color="gray">Nombre de Pos</Text>
+                  <Text paragraph color="gray">Nombre de POS</Text>
                 </Block>
               </Block>
               <Block>
         <Text h2 light>{this.state.nbDIS}</Text>
                 <Block row center>
                   <Label blue />
-                  <Text paragraph color="gray">Nombre de Master Distributeur</Text>
+                  <Text paragraph color="gray">Nombre de Masters Distributeurs</Text>
                 </Block>
               </Block>
               
             </Block>
           </Card>
+          
 
 
           <Block row style={[styles.margin, { marginTop: 18 }]}>
           
             <Card middle style={styles.margin, { marginTop: 18,borderRadius: 20 }} backgroundColor="#097C3E" >
               <Icon vehicle />
-              <Text h3 bold   color="white" style={{ marginTop: 17 }} onPress={() => navigation.navigate('DistRegister',{phone:this.state.phone})} >+ NEW</Text>
-              <Text paragraph color="white" onPress={() => navigation.navigate('DistRegister',{phone:this.state.phone})} > Distributeur (Cliquez pour enregistrer de nouveau points de vente)</Text>
+              <Text h3 bold   color="white" style={{ marginTop: 17 }} onPress={() => navigation.navigate('DistRegister',{phone:this.state.phone})} >+ NOUVEAU</Text>
+              <Text paragraph color="white" onPress={() => navigation.navigate('DistRegister',{phone:this.state.phone})} >(cliquez pour enregistrer de nouveaux Points de Vente ou Masters Distributeurs)</Text>
             </Card>
           </Block>
 
           <Card
-            title="Mes Enregistrements"
+            title="MES ENROLEMENTS"
             style={[styles.margin, { marginTop: 18,borderRadius: 20 }]}
            
           >
@@ -161,7 +321,7 @@ class Overview extends Component {
               <TouchableOpacity activeOpacity={0.8}>
                 <Block row center>
                   <Block flex={2}>
-    <Text h3  onPress={() => navigation.navigate('Chat',{phone:this.state.phone,PosEnregister:this.state.PosEnregister})}>Voir la Liste des Points de vente enregistrés </Text>
+    <Text h3  onPress={() => navigation.navigate('Chat',{phone:this.state.phone,PosEnregister:this.state.PosEnregister})}>Voir la liste des points de vente enregistrés</Text>
                     <Text paragraph color="gray">
                    
                     </Text>

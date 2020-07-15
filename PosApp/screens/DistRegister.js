@@ -113,15 +113,73 @@ class DistRegister extends Component {
   }
 
   submit= async(navigation)=> {
-
     AsyncStorage.getItem('PosUser', (err, res) => {
-  //  res=JSON.parse(res)
+
+      res=JSON.parse(res)
      
     let collection={}
     collection.fullName=this.state.fullName,
     collection.email=this.state.email,
     collection.pays=this.state.pays,
-    collection.ville=this.state.ville
+    collection.ville=this.state.ville,
+    collection.telephone=this.state.telephone,
+    collection.adresse=this.state.adresse,
+    collection.nomCommercial=this.state.nomCommercial,
+    collection.rccm=this.state.rccm,
+    collection.agentTerrain=res.phone,
+    collection.typePos=this.state.typePos,
+   collection.identifiant='MQash-Dis'+Date.now()
+   
+     axios({
+      method: 'post',
+      url:  'https://assurtous.ci:50970/dis',
+      data: collection
+    })
+    .then(function (response) {
+          console.log(response)
+          if(response.data.message=="succes"){
+
+           Toast.show('Vous avez bien enregistré le Distributeur!!');
+                   navigation.navigate('Camera',{identifiant:response.data.id,id:collection.nomCommercial,typePos:collection.typePos});
+                  
+        
+           }else if(response.data.message=="Existe déjà"){
+            console.log(response.data.message); 
+         
+            Toast.show('lutilisateur existe déja');
+            }else{
+                Toast.show('Verifier tous les champs ');
+            }
+       
+    })  
+    .catch(function (error) {
+      console.log(error);
+    });
+    this.setState({
+       typePos: 'init',
+       nomCommercial :'',
+        fullName:'',
+        telephone:'',
+        email:'',
+        pays :'',
+        ville :'',
+        adresse :'',
+        rccm :''   
+    })
+
+  })
+}
+    
+/*
+    AsyncStorage.getItem('PosUser', (err, res) => {
+   res=JSON.parse(res)
+     console.log(res.phone)
+    let collection={}
+    collection.fullName=this.state.fullName,
+    collection.email=this.state.email,
+    collection.pays=this.state.pays,
+    collection.ville=this.state.ville,
+    collection.telephone=this.state.telephone,
     collection.adresse=this.state.adresse,
     collection.nomCommercial=this.state.nomCommercial,
     collection.rccm=this.state.rccm,
@@ -133,7 +191,7 @@ class DistRegister extends Component {
 
 
      if( this.state.fullName=="" ||  this.state.pays==""|| this.state.ville=="" || this.state.adresse==""||  this.state.nomCommercial=="" ||  this.state.typePos==""){
-      Toast.show('Veillez verifier si les champs sont bien remplis');
+      Toast.show('Veuillez vérifier si les champs sont bien remplis');
     }else{
          
      // AsyncStorage.removeItem('PosUser')
@@ -143,16 +201,11 @@ class DistRegister extends Component {
     
      console.log(result)
      if(result.nomCommercial==collection.nomCommercial){
-       Toast.show('Vous êtes déja enregistré');
+       Toast.show('le point de vente est déja enregistré');
      }else{
       
      // AsyncStorage.setItem('PosUser', JSON.stringify(User));
-     AsyncStorage.setItem('Dis', result +',' + JSON.stringify(collection));
-
-   // var Dis= result
-      //result = JSON.parse(result);
-     // Dis.push( JSON.stringify(collection));
-       
+     AsyncStorage.setItem('Dis', result +',' + JSON.stringify(collection));   
      navigation.navigate("Camera",{typePos:this.state.typePos,id:this.state.nomCommercial});
        
      }
@@ -187,7 +240,7 @@ class DistRegister extends Component {
 
   }
 
-
+*/
 /*  submit(navigation){
     let collection={}
     collection.fullName=this.state.fullName,
@@ -271,7 +324,7 @@ class DistRegister extends Component {
             <Block row space="between" style={{ marginTop: 25 }}>
               <Block>
             
-     <Text center h3 regular  color="white">Master Distributeur  {this.state.agentTerain}</Text>
+     <Text center h3 regular  color="white">Master distributeur  </Text>
               </Block>
             </Block>
           </Card>
@@ -289,8 +342,8 @@ class DistRegister extends Component {
                         onValueChange={(itemValue, itemIndex) =>  
                             this.setState({language: itemValue, typePos: itemValue})}>  
                     <Picker.Item label="Selectionner le Type de POS" value="init" />  
-                    <Picker.Item label="POS independant" value="PosInd" />  
-                    <Picker.Item label="Distributeur" value="Dis" />  
+                    <Picker.Item label="POS indépendant" value="PosInd" />  
+                    <Picker.Item label="Master distributeur" value="Dis" />  
                 </Picker>  
               
             </View> 
@@ -309,9 +362,9 @@ class DistRegister extends Component {
             <Input
               full
               text
-              label="Nom et prenom du gerant"
+              label="Nom et prénom du gérant"
               value={this.state.fullName}
-               placeholder="Nom et prenom du gerant"
+               placeholder="Nom et prénom du gérant"
                onChangeText={(text)=>this.register(text,'fullName')}
               style={{ marginBottom: 10,height: 40}}
             />
@@ -320,9 +373,9 @@ class DistRegister extends Component {
               full
               number
                value={this.state.telephone}
-              label="Numéro télephone"
+              label="Numero telephone"
               onChangeText={(text)=>this.register(text,'telephone')}
-               placeholder="Ex: + 225 -- -- -- -- -- -- "
+               placeholder="Numéro téléphone "
               style={{ marginBottom: 10,height: 40 }}
             />
               <Input

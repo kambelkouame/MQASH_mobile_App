@@ -36,33 +36,21 @@ constructor(){
 
     this.state={
       typePos: 'POS',
-     nomCommercial :'',
+      nomCommercial :'',
       fullName:'',
       agentTerrain:'',
       telephone:'',
       email:'',
-       pays :'',
-     ville :'',
+      pays :'',
+      ville :'',
       adresse :'',
       rccm :'' ,
-      id_dis:'' 
+      id:'' 
     }
   }
 
   register(text, field){
-    if(field=='ville'){
-      this.setState({
-        ville:text,
-      })
-    }else if(field =='pays'){
-      this.setState({
-        pays:text,
-      })
-    }else if(field =='adresse'){
-      this.setState({
-        adresse:text,
-      })
-    }else if(field =='nomCommercial'){
+  if(field =='nomCommercial'){
       this.setState({
         nomCommercial:text,
       })
@@ -75,17 +63,9 @@ constructor(){
       this.setState({
         fullName:text,
       })
-    } else if(field =='typePos'){
+    } else if(field =='adresse'){
       this.setState({
-        typePos:text,
-      })
-    }else if(field =='rccm'){
-      this.setState({
-        rccm:text,
-      })
-    }else if(field =='email'){
-      this.setState({
-        email:text,
+        adresse:text,
       })
     }
   }
@@ -94,23 +74,77 @@ constructor(){
 
     AsyncStorage.getItem('PosUser', (err, res) => {
       res=JSON.parse(res)
-      console.log(res.phone)
+
+      collection={}
+      collection.fullName=this.state.fullName,
+      collection.email="any@any.com",
+      collection.pays="any",
+      collection.ville="any",
+      collection.telephone=this.state.telephone,
+      collection.adresse=this.state.adresse,
+      collection.nomCommercial=this.state.nomCommercial,
+      collection.rccm="any",
+       collection.agentTerrain=res.phone,
+       collection.typePos="POS",
+       collection.id_dis=this.state.id,
+       collection.identifiant='MQash-Dis'+Date.now()
+
+    axios({
+      method: 'post',
+      url:  'https://assurtous.ci:50970/dis',
+      data: collection
+    })
+    .then(function (response) {
+          console.log(response)
+          if(response.data.message=="succes"){
+
+           Toast.show('Vous avez bien enregistré le POS !!');
+             
+           }else if(response.data.message=="Existe déjà"){
+            console.log(response.data.message); 
+         
+            Toast.show('lutilisateur existe déja');
+            }else{
+                Toast.show('Verifier tous les champs ');
+            }
+       
+    })  
+    .catch(function (error) {
+      console.log(error);
+    });
+    this.setState({
+       typePos: 'init',
+       nomCommercial :'',
+        fullName:'',
+        telephone:'',
+        email:'',
+        pays :'',
+        ville :'',
+        adresse :'',
+        rccm :''   
+    })
+  
+
+/*
+    AsyncStorage.getItem('PosUser', (err, res) => {
+      res=JSON.parse(res)
     let collection={}
     collection.fullName=this.state.fullName,
-    collection.email=this.state.email,
-    collection.pays=this.state.pays,
-    collection.ville=this.state.ville
+    collection.email="any@any.com",
+    collection.pays="any",
+    collection.ville="any",
+    collection.telephone=this.state.telephone,
     collection.adresse=this.state.adresse,
     collection.nomCommercial=this.state.nomCommercial,
-    collection.rccm=this.state.rccm,
-    collection.id_dis=this.state.id_dis,
-    collection.agentTerrain=res.phone,
-    collection.typePos="Pos";
-    collection.identifiant='MQash-Pos'+Date.now()
+    collection.rccm="any",
+     collection.agentTerrain=res.phone,
+     collection.typePos="POS",
+     collection.id=this.state.id,
+     collection.identifiant='MQash-Dis'+Date.now()
 
     AsyncStorage.getItem('Dis', (err, result) => {
     if (result !== null) {
-    
+      console.log(collection)
       console.log(result)
       if(result.nomCommercial==collection.nomCommercial){
         Toast.show('Vous êtes déja enregistré');
@@ -128,137 +162,30 @@ constructor(){
     
       
    }
-  })
-
-  });
-    this.setState({
+   this.setState({
      
-       fullName:'',
-       telephone:'',
-       email:'',
-       pays :'',
-       ville :'',
-       adresse :'',
-       rccm:''   
-   })
-  
+    fullName:'',
+    telephone:'',
+    email:'',
+    pays :'',
+    ville :'',
+    adresse :'',
+    rccm:''   
+})
 
-
-  }
-/*
-  submit(navigation){
-    let collection={}
-    collection.fullName=this.state.fullName,
-    collection.email=this.state.email,
-    collection.pays=this.state.pays,
-    collection.ville=this.state.ville
-    collection.adresse=this.state.adresse,
-    collection.nomCommercial=this.state.nomCommercial,
-    collection.rccm=this.state.rccm,
-     collection.agentTerrain=this.state.agentTerrain,
-     collection.typePos=this.state.typePos,
-      collection.id_dis=this.state.id_dis
-   
-     axios({
-      method: 'post',
-      url:  'http://192.168.43.218:3000/dis',
-      data: collection
-    })
-    .then(function (response) {
-          console.log(response)
-          if(response.data.message=="succes"){
-
-          Toast.show('Vous avez bien enregistré le POS!!');
-          navigation.navigate('Camera2',{phone:collection.agentTerrain}); 
-              
-        
-           }else if(response.data.message=="Existe déjà"){
-            console.log(response.data.message); 
-         
-            Toast.show('lutilisateur existe deja');
-            }else{
-                Toast.show('Verifier tous les champs ');
-            }
-       
-    })  
-    .catch(function (error) {
-      console.log(error);
-    });
-    this.setState({
-       typePos: 'Pos',
-       nomCommercial :'',
-        fullName:'',
-        telephone:'',
-        email:'',
-        pays :'',
-        ville :'',
-        adresse :'',
-        rccm :''   
-    })
-    
-  }*/
-  /*
-
-  submit(navigation){
-    let collection={}
-    collection.fullName=this.state.fullName,
-    collection.email=this.state.email,
-    collection.pays=this.state.pays,
-    collection.ville=this.state.ville
-    collection.adresse=this.state.adresse,
-    collection.nomCommercial=this.state.nomCommercial,
-    collection.rccm=this.state.rccm,
-     collection.agentTerrain=this.state.agentTerrain,
-     collection.typePos=this.state.typePos,
-      collection.id_dis=this.state.id_dis
-   
-     axios({
-      method: 'post',
-      url:  'http://192.168.43.218:3000/dis',
-      data: collection
-    })
-    .then(function (response) {
-          console.log(response)
-          if(response.data.message=="succes"){
-
-          Toast.show('Vous avez bien enregistré le POS!!');
-          navigation.navigate('Camera2',{phone:collection.agentTerrain}); 
-              
-        
-           }else if(response.data.message=="Existe déjà"){
-            console.log(response.data.message); 
-         
-            Toast.show('lutilisateur existe deja');
-            }else{
-                Toast.show('Verifier tous les champs ');
-            }
-       
-    })  
-    .catch(function (error) {
-      console.log(error);
-    });
-    this.setState({
-       typePos: 'Pos',
-       nomCommercial :'',
-        fullName:'',
-        telephone:'',
-        email:'',
-        pays :'',
-        ville :'',
-        adresse :'',
-        rccm :''   
-    })
-    
-  }
-
+  })
 */
+  });
+    
+
+
+  }
+
   render() {
 
- 
-
    const { navigation } = this.props;
-   this.state.id_dis = navigation.getParam('id');  
-  
+   this.state.id = navigation.getParam('_id');  
+  console.log( this.state.id)
     
 
      return (
@@ -300,6 +227,7 @@ constructor(){
 
               <Input
               full
+              text
               label="Nom commercial "
               value={this.state.nomCommercial}
                placeholder="Nom commercial"
@@ -308,10 +236,10 @@ constructor(){
             />
              <Input
               full
-              text
-              label="Nom et prenom du gerant"
+              Text
+              label="Nom et prénom du gérant"
               value={this.state.fullName}
-               placeholder="Nom et prenom du gerant"
+               placeholder="Nom et prénom du gérant"
                onChangeText={(text)=>this.register(text,'fullName')}
               style={{ marginBottom: 10,height: 40}}
             />
@@ -320,9 +248,9 @@ constructor(){
               full
               number
                value={this.state.telephone}
-              label="Numéro télephone"
+              label="Numero telephone"
               onChangeText={(text)=>this.register(text,'telephone')}
-               placeholder="Ex: + 225 -- -- -- -- -- -- "
+               placeholder="Numéro télephone"
               style={{ marginBottom: 10,height: 40 }}
             />
             </Block>
@@ -333,7 +261,7 @@ constructor(){
                 full
                 text
                 label="Localisation"
-                placeholder=" "
+                placeholder="Saisissez la localisation "
                  value={this.state.adresse}
                  onChangeText={(text)=>this.register(text,'adresse')}
                 style={{ marginBottom: 10 ,height: 40}}
@@ -343,9 +271,9 @@ constructor(){
                         full
                         style={{ marginBottom: 12 }}
                         color="#6281C0" 
-                        onPress={()=>navigation.navigate('CarouselMap')}
+                        
                       >
-                        <Text button>Choisir la Géolocalisation</Text>
+                        <Text button>Choisir la géolocalisation</Text>
                           </Button>
 
              

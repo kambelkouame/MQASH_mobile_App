@@ -1,5 +1,9 @@
 import React, { Fragment, Component } from 'react';
+const axios = require('axios');
 import ImagePicker from 'react-native-image-picker';
+
+
+
 import {
   SafeAreaView,
   StyleSheet,
@@ -12,7 +16,7 @@ import {
   TouchableOpacity
 } from 'react-native';
 import AsyncStorage from '@react-native-community/async-storage'
-import { Button, Block, Text, Card, Input , Label} from '../components';
+import { Button, Block, Text, Card, Input, Label } from '../components';
 
 import {
   Header,
@@ -40,92 +44,136 @@ export default class Camera extends Component {
       },
       fileData: '',
       fileUri: '',
-      Doc:'init',
-      id_dis:'',
-      contrat:'',
-      status:'',
-      agentTerrain:'',
-      cnir:'',
-      cniv:'',
-      DFE:'',
-      rccm:'',
-      quitance:'',
-      typePos:'',
+      Doc: 'init',
+      id_dis: '',
+      contrat: '',
+      status: '',
+      agentTerrain: '',
+      cnir: '',
+      cniv: '',
+      DFE: '',
+      rccm: '',
+      quitance: '',
+      typePos: '',
+      base64:'',
+      source:{},
+      id:""
+
+    }
+  }
+
+
+  register(text, field) {
+    if (field == 'fileData') {
+      this.setState({
+        fileData: text,
+      })
+    } else if (field == 'fileUri') {
+      this.setState({
+        fileUri: text,
+      })
+    } else if (field == 'Doc') {
+      this.setState({
+        Doc: text,
+      })
+    }
+
+  }
+
+
+   cloudinaryUpload = (photo) => {
+    
+    let formdata = new FormData();
+    formdata.append("id", this.state.id_dis)
+    formdata.append("myFile", {uri: photo.uri, name: this.state.id_dis+'.jpeg', type: 'multipart/form-data'})
+    console.log(formdata)
+axios.post('https://assurtous.ci:50970/dis/uploadData', formdata, {
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'multipart/form-data;boundary=${formdata._boundary}'
+    }
+})
+.then(function (response) {
+  console.log(response)  
+})  
+.catch(function (error) {
+console.log(error);
+});
+  /*  axios({
+      method: 'post',
+      url:  'http://192.168.43.218:3000/dis/uploadData',
       
-
-    }
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'multipart/form-data'
+        },
+      data: data
+    })
+    .then(function (response) {
+          console.log(response)  
+    })  
+    .catch(function (error) {
+      console.log(error);
+    });
+    */
   }
 
 
-  register(text, field){
-    if(field=='fileData'){
-      this.setState({
-        fileData:text,
-      })
-    }else if(field =='fileUri'){
-      this.setState({
-        fileUri:text,
-      })
-    }else if(field =='Doc'){
-      this.setState({
-        Doc:text,
-      })
+  Suivant(navigation) {
+    if (this.state.typePos == "Dis") {
+      console.log(this.state.typePos)
+      navigation.navigate('PosRegister', { id: this.state.id_dis,_id:this.state.id })
+    } else {
+      console.typePos
+      navigation.navigate('Overview')
     }
-  
-  }
-
-
-  Suivant(navigation){
-      if(this.state.typePos=="Dis"){
-        console.log(this.state.typePos)
-         navigation.navigate('PosRegister',{id:this.state.id_dis})
-      }else{
-        console.typePos
-        navigation.navigate('Overview')
-      }
     this.setState({
       fileData: '',
-      Doc :'init',
-      fileUri :''    
+      Doc: 'init',
+      fileUri: ''
     })
-    
+
   }
 
 
-  submit(navigation){
+  submit(navigation) {
 
     AsyncStorage.getItem('PosUser', (err, res) => {
-     // res=JSON.parse(res)
+      // res=JSON.parse(res)
       console.log(res)
-    let collection={}
-    collection.fileData=this.state.fileData,
-    collection.fileUri=this.state.fileUri,
-    collection.Doc=this.state.Doc
-     // console.log(this.state.fileData.path)
-     // console.log(this.state.fileUri)
-     
-    this.setState({
-      fileData: '',
-      Doc :'init',
-      fileUri :''    
-    })
+      let collection = {}
+      collection.fileData = this.state.fileData,
+        collection.fileUri = this.state.fileUri,
+        collection.Doc = this.state.Doc
+   
+      this.setState({
+        fileData: '',
+        Doc: 'init',
+        fileUri: ''
+      })
 
-  });
-    
+    });
+
   }
-
   chooseImage = () => {
+
+
     let options = {
-      title: 'Selection de l\'option scan',
-     
+      title: 'Select Image',
+     noData: true,
+     maxWidth: 500,
+     maxHeight: 500,
+      customButtons: [
+        { name: 'customOptionKey', title: 'Choose Photo from Custom Option' },
+      ],
       storageOptions: {
         skipBackup: true,
         path: 'images',
       },
     };
     ImagePicker.showImagePicker(options, (response) => {
-     //console.log('Response = ', response);
-    //  console.log(response.path)
+      console.log('Response = ', response);
+
       if (response.didCancel) {
         console.log('User cancelled image picker');
       } else if (response.error) {
@@ -136,77 +184,33 @@ export default class Camera extends Component {
       } else {
         const source = { uri: response.uri };
 
-       // console.log('response', JSON.stringify(response));
-        this.setState({
-          filePath: response,
-          fileData: response.data,
-          fileUri: response.uri
-        });
-      }
-    });
-  }
-
-  launchCamera = () => {
-    let options = {
-      storageOptions: {
-        skipBackup: true,
-        path: 'images',
-      },
-    };
-    ImagePicker.launchCamera(options, (response) => {
-    // console.log('Response = ', response);
-      
-      if (response.didCancel) {
-        console.log('User cancelled image picker');
-      } else if (response.error) {
-        console.log('ImagePicker Error: ', response.error);
-      } else if (response.customButton) {
-        console.log('User tapped custom button: ', response.customButton);
-        alert(response.customButton);
-      } else {
-        const source = { uri: response.uri };
         console.log('response', JSON.stringify(response));
+        const uri = response.uri;
+        const type = response.type;
+        const name = response.fileName;
+        const data = {
+          uri,
+          type,
+          name,
+        }
+        this.cloudinaryUpload(data)
         
         this.setState({
           filePath: response,
           fileData: response.data,
-          fileUri: response.uri
-        });
-      }
-    });
-
-  }
-
-  launchImageLibrary = () => {
-    let options = {
-      storageOptions: {
-        skipBackup: true,
-        path: 'images',
-      },
-    };
-    ImagePicker.launchImageLibrary(options, (response) => {
-      console.log('Response = ', response);
-      console.log(response.path)
-      if (response.didCancel) {
-        console.log('User cancelled image picker');
-      } else if (response.error) {
-        console.log('ImagePicker Error: ', response.error);
-      } else if (response.customButton) {
-        console.log('User tapped custom button: ', response.customButton);
-        alert(response.customButton);
-      } else {
-        const source = { uri: response.uri };
-        console.log('response', JSON.stringify(response));
-        this.setState({
-          filePath: response,
-          fileData: response.data,
           fileUri: response.uri,
-          agentTerrain:''
+          
         });
+        
+        
+        
       }
     });
-
   }
+
+  
+
+ 
 
   renderFileData() {
     if (this.state.fileData) {
@@ -233,28 +237,31 @@ export default class Camera extends Component {
       />
     }
   }
+
+
+  
   render() {
+ 
+    const { navigation } = this.props;
 
-   const { navigation } = this.props;
-
-   this.state.typePos = navigation.getParam('typePos'); 
-   this.state.id_dis = navigation.getParam('id'); 
-    console.log(this.state.typePos)
+    this.state.typePos = navigation.getParam('typePos');
+    this.state.id_dis = navigation.getParam('id');
+    this.state.id = navigation.getParam('identifiant');
     return (
       <Fragment>
         <StatusBar barStyle="dark-content" />
         <SafeAreaView>
           <View style={styles.body}>
-            <Text style={{textAlign:'center',fontSize:20,paddingBottom:10}} >Veillez selectionner le Scan de Fichier</Text>
+            <Text style={{ textAlign: 'center', fontSize: 20, paddingBottom: 10 }} ></Text>
             <View style={styles.ImageSections}>
               <View>
                 {this.renderFileData()}
-                <Text  style={{textAlign:'center'}}>Fichier à Impoter</Text>
+                <Text style={{ textAlign: 'center' }}>Fichier à importer</Text>
               </View>
               <View>
                 {this.renderFileUri()}
-                <Text style={{textAlign:'center'}}>Fichier à 
-                Scanner</Text>
+                <Text style={{ textAlign: 'center' }}>Fichier à
+                scanner</Text>
               </View>
             </View>
 
@@ -264,59 +271,48 @@ export default class Camera extends Component {
               </TouchableOpacity>
 
 
-             
+
             </View>
 
-            <View   style={{textAlign:'center'}}>  
-                <Picker 
-                  
+            <View style={{ textAlign: 'center' }}>
+              <Picker
+
                 value={this.state.Doc}
-                        selectedValue={this.state.language}  
-                        onValueChange={(itemValue, itemIndex) =>  
-                            this.setState({language: itemValue, Doc: itemValue})}  
-                    >  
-                    <Picker.Item label="Selectionner le nom du Document" value="init" />  
-                    <Picker.Item label="Contrat signé" value="contrat" />  
-                    <Picker.Item label="Statut de la société" value="status" /> 
-                    <Picker.Item label="CNI recto" value="cnir" />   
-                    <Picker.Item label="CNI Verso" value="cniv" />   
-                    <Picker.Item label="DFE ou patente" value="DFE" />  
-                    <Picker.Item label="N° RCCM" value="rccm" /> 
-                    <Picker.Item label="quitance loyer / CIE  / SODECI" value="quitance" />     
-                </Picker> 
-
-                <Button
-                full
-                style={{ marginBottom: 12 ,marginHorizontal:20}}
-
-                //onPress={()=>this.submit(navigation)}
-                onPress={()=>this.submit(navigation)}
+                selectedValue={this.state.language}
+                onValueChange={(itemValue, itemIndex) =>
+                  this.setState({ language: itemValue, Doc: itemValue })}
               >
-                <Text button>Valider</Text>
-              </Button>
-
+                <Picker.Item label="Sélectionner le nom du document" value="init" />
+                <Picker.Item label="Contrat signé" value="contrat" />
+                <Picker.Item label="Statut de la société" value="status" />
+                <Picker.Item label="CNI recto" value="cnir" />
+                <Picker.Item label="CNI Verso" value="cniv" />
+                <Picker.Item label="DFE ou patente" value="DFE" />
+                <Picker.Item label="N° RCCM" value="rccm" />
+                <Picker.Item label="Quittance loyer / Facture d'électricité / Facture d'eau" value="quitance" />
+              </Picker>
 
               <Button
                 full
-                style={{ marginBottom: 12 ,marginHorizontal:20}}
-                onPress={()=>this.Suivant(navigation)}
+                style={{ marginBottom: 12, marginHorizontal: 20 }}
+                onPress={() => this.Suivant(navigation)}
               >
                 <Text button>Suivant</Text>
               </Button>
-              
-            </View> 
-           
-            
+
+            </View>
+
+
           </View>
 
-         
-         
+
+
         </SafeAreaView>
       </Fragment>
     );
   }
+  
 };
-
 const styles = StyleSheet.create({
   scrollView: {
     backgroundColor: Colors.lighter,
@@ -346,7 +342,7 @@ const styles = StyleSheet.create({
   },
   btnParentSection: {
     alignItems: 'center',
-    marginTop:10
+    marginTop: 10
   },
   btnSection: {
     width: 225,
@@ -355,15 +351,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 3,
-    marginBottom:10
+    marginBottom: 10
   },
   btnText: {
     textAlign: 'center',
     color: 'gray',
     fontSize: 14,
-    fontWeight:'bold'
+    fontWeight: 'bold'
   }
-});
+}); 
 /*
 import React, { Component } from 'react';
 import {
@@ -395,7 +391,7 @@ const moveAttachment = async (filePath, newFilepath) => {
             console.log('moveFile error', error);
             reject(error);
           });
-      }) 
+      })
       .catch(err => {
         console.log('mkdir error', err);
         reject(err);

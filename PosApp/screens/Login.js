@@ -40,33 +40,68 @@ class Login extends Component{
   }
 
  submit= async(navigation)=> {
-  let User={}
+ /* let User={}
   User.email=this.state.email,
   User.phone=this.state.phone,
   User.password=this.state.password
- // AsyncStorage.removeItem('PosUser')
+*/
 
+  let collection={}
+  collection.email=this.state.email,
+  collection.phone=this.state.phone,
+  collection.password=this.state.password
+ if(collection.phone==""){
+  Toast.show('le champ MAIL/TELEPHONE/IDENTIFIANT est vide')
+ }else if(collection.password=="" && collection.phone==""){
+  Toast.show('les champs EMAIL/TELEPHONE/IDENTIFIANT et MOT DE PASSE sont vides')
+ }else if(collection.password==""){
+  Toast.show('le champ MOT DE PASSE  est vide')
+ }else{
+  axios ({
+    method: 'post',
+    url:  'https://assurtous.ci:50970/login',
+    data: collection
+  })
+  .then(function (response) {
+    console.log(response)
+    if(response.data.error =="no user"){
+
+      Toast.show('l\'utilisateur n\'existe pas');
+
+      //console.log(response.data.error)
+    }else if(response.data.message =="validate"){
+      console.log(response.data)
+      Toast.show('validate');
+       navigation.navigate('Overview',{phone:collection.phone});
+    }
+  })
+
+  .catch(function (error) {
+    console.log(error);
+  });
+ }
+ 
+ // AsyncStorage.removeItem('PosUser')
+/*
   await AsyncStorage.getItem('PosUser', (err, result) => {
    result=JSON.parse(result)
    
       console.log(result)
       if(result !== null){
-
-      
            if([(result.phone == User.phone && result.password == User.password) || (result.email == User.phone && result.password == User.password)]){
             console.log(User)
          navigation.navigate("Overview");
          Toast.show('Bienvenue');
        }else{
-        Toast.show('Vous n\' etes pas enregistré veillez vous enregistrer');
+        Toast.show('Vous n\' etes pas enregistré Veuillez vous enregistrer');
         navigation.navigate("Register");
        }
       }else{
-        Toast.show('Veillez vous enregistrer');
+        Toast.show('Veuillez vous enregistrer');
       }
      });
     
-   
+   */
     }
 /*   submit= async(navigation)=> {
     let collection={}
@@ -127,7 +162,7 @@ class Login extends Component{
               Connexion
             </Text>
             <Text paragraph color="black3">
-             Veillez vous connecter pour debuter!
+            Veuillez vous connecter pour démarrer.
             </Text>
 
             <Block center style={{ marginTop: 44 }}>
@@ -135,8 +170,8 @@ class Login extends Component{
               <Input
                 full
                 text
-                placeholder="Email ou numero de telephone"
-                label="Email/numero telephone/Identifiant"
+                placeholder="Email ou Numéro de téléphone ou Identifiant"
+                label="Email/numero de telephone/Identifiant"
                 onChangeText={(text)=>this.connexion(text,'phone')}
                 style={{ marginBottom: 25 }}
               />
@@ -144,7 +179,7 @@ class Login extends Component{
               <Input
                 full
                 password
-                label="Password"
+                label="Mot de passe"
                 onChangeText={(text)=>this.connexion(text,'password')}
                 style={{ marginBottom: 25 }}
                  ref={ inmdp => this.inputmdp = inmdp }
@@ -155,7 +190,7 @@ class Login extends Component{
                     color="gray"
                     onPress={() => navigation.navigate('Forgot')}
                   >
-                    Mot de passe oublié?
+                    MOT DE PASSE OUBLIE?
                   </Text>
                 }
               />
@@ -167,15 +202,15 @@ class Login extends Component{
                 onPress={()=>this.submit(navigation)}
               // onPress={() => navigation.navigate('Overview')}
               >
-                <Text button>connexion</Text>
+                <Text button>Connexion</Text>
               </Button>
               <Text paragraph color="gray">
-                Vous ne disposer pas de compte? <Text
+              Vous ne pas disposez de compte? <Text
                   height={18}
                   color="blue"
 
                 onPress={() => navigation.navigate('Register')}>
-                     enregistrement
+                     S'enregistrer
                 </Text>
               </Text>
             </Block>

@@ -8,7 +8,6 @@ import Email from "../screens/email";
 import Sms from "../screens/sms";
 import ConfirmSms from "../screens/confirmSms";
 import ConfirmMail from "../screens/confirmMail";
-import Camera from "../screens/camera";
 import Camera2 from "../screens/camera2";
 
 
@@ -24,7 +23,6 @@ export default createStackNavigator(
     Sms,
     ConfirmMail,
     ConfirmSms,
-    Camera, 
     Camera2,
     
     

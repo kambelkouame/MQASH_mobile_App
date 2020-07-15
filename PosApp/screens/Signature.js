@@ -9,9 +9,6 @@ export default class Demo extends Component {
           <SignaturePad onError={this._signaturePadError}
                         onChange={this._signaturePadChange}
                         style={{flex: 1, backgroundColor: 'white'}}/>
-
-
-  
       </View>
     )
 

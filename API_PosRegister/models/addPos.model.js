@@ -15,6 +15,10 @@ var addPosSchema = new mongoose.Schema({
         type: String
        
     },
+    pays: {
+        type: String
+       
+    },
     username: {
         type: String
         

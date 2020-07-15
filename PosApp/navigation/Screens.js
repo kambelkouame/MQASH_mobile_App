@@ -5,12 +5,12 @@ import Settings from "../screens/Settings";
 import DistRegister from "../screens/DistRegister";
 import PosRegister from "../screens/PosRegister";
 import Chat from "../screens/Chat";
-
+import Camera from "../screens/camera";
 export default createDrawerNavigator({
   OverviewStack,
   Settings,
   DistRegister,
   PosRegister,
   Chat,
-
+  Camera
 });

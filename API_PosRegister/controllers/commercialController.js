@@ -13,8 +13,9 @@ router.post('/register', (req, res) => {
 });
 
 
+
 function insertCommercial(req, res) {
-   if(req.body.fullName==''|| req.body.last_name=='' || req.body.email=='' || req.body.phone=='' || req.body.password=='' ){
+   if(req.body.fullName==''|| req.body.last_name=='' || req.body.email=='' || req.body.phone=='' || req.body.password==''||req.body.pays=='' ){
          res.jsonp({message:' Veillez vous Assurer que tous les champs sont bien remplis'})
     }else{
 
@@ -27,6 +28,7 @@ function insertCommercial(req, res) {
             commercial.last_name = req.body.last_name;
             commercial.email = req.body.email;
             commercial.phone = req.body.phone;
+            commercial.pays = req.body.pays;
             commercial.password = req.body.password;
             commercial.CreationDate = Date.now();
             commercial.lastConnect =  Date.now();
@@ -88,7 +90,7 @@ Commercial.findOne({phone: req.body.phone, password: req.body.password})
             res.jsonp({message: 'validate'})
         
             } else {
-                res.jsonp({ error: 'l utilisateur n existe pas' })
+                res.jsonp({ error: 'no user' })
             }
             })
             .catch(err => {
