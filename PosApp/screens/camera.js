@@ -1,9 +1,7 @@
 import React, { Fragment, Component } from 'react';
 const axios = require('axios');
 import ImagePicker from 'react-native-image-picker';
-
-
-
+import Toast from 'react-native-simple-toast';
 import {
   SafeAreaView,
   StyleSheet,
@@ -12,6 +10,7 @@ import {
   StatusBar,
   Image,
   Dimensions,
+  ActivityIndicator,
   Picker,
   TouchableOpacity
 } from 'react-native';
@@ -38,6 +37,8 @@ export default class Camera extends Component {
   constructor(props) {
     super(props)
     this.state = {
+      
+     loader:true,
       filepath: {
         data: '',
         uri: ''
@@ -82,22 +83,43 @@ export default class Camera extends Component {
 
 
    cloudinaryUpload = (photo) => {
-    
+    let imgcol ={}
+    imgcol.uri =photo.uri,
+    imgcol.name =  this.state.id_dis+'.jpeg',
+    imgcol.type ='multipart/form-data'
+
+   
     let formdata = new FormData();
     formdata.append("id", this.state.id_dis)
     formdata.append("myFile", {uri: photo.uri, name: this.state.id_dis+'.jpeg', type: 'multipart/form-data'})
+   
     console.log(formdata)
-axios.post('https://assurtous.ci:50970/dis/uploadData', formdata, {
+axios.post('http://192.168.43.218:3000/dis/uploadData', formdata, {
     headers: {
       'Accept': 'application/json',
       'Content-Type': 'multipart/form-data;boundary=${formdata._boundary}'
     }
 })
 .then(function (response) {
-  console.log(response)  
+  //console.log(response)  
 })  
 .catch(function (error) {
-console.log(error);
+
+  AsyncStorage.getItem('StoreDocument', (err, result) => {
+    if (result !== null) {
+     console.log("le resutzt est "+result)
+      
+      // AsyncStorage.setItem('PosUser', JSON.stringify(User));
+      AsyncStorage.setItem('StoreDocument', result +','  + JSON.stringify(imgcol));   
+    
+      Toast.show('Document Enregistré avec success!!'); 
+   }else {
+         
+     AsyncStorage.setItem('StoreDocument',JSON.stringify(imgcol) );
+     Toast.show('Document Enregistré avec success!!'); 
+   
+      }
+ });
 });
   /*  axios({
       method: 'post',
@@ -210,6 +232,14 @@ console.log(error);
 
   
 
+  renderloader(){
+    if(this.state.loader==true){
+      return  <View style={[styles.container, styles.horizontal]}>
+          <ActivityIndicator size="large" color="#00ff00" />
+        </View>
+    }
+  }
+
  
 
   renderFileData() {
@@ -239,6 +269,14 @@ console.log(error);
   }
 
 
+  renderloader(){
+    if(this.state.loader==1){
+      return  <View style={[styles.container, styles.horizontal]}>
+          <ActivityIndicator size="large" color="#00ff00" />
+        </View>
+    }
+  }
+
   
   render() {
  
@@ -256,18 +294,17 @@ console.log(error);
             <View style={styles.ImageSections}>
               <View>
                 {this.renderFileData()}
-                <Text style={{ textAlign: 'center' }}>Fichier à importer</Text>
+                <Text style={{ textAlign: 'center' }}>Upload a photo</Text>
               </View>
               <View>
                 {this.renderFileUri()}
-                <Text style={{ textAlign: 'center' }}>Fichier à
-                scanner</Text>
+                <Text style={{ textAlign: 'center' }}>Take a photo</Text>
               </View>
             </View>
 
             <View style={styles.btnParentSection}>
               <TouchableOpacity onPress={this.chooseImage} style={styles.btnSection}  >
-                <Text style={styles.btnText}>Effecuer un Scan</Text>
+                <Text style={styles.btnText}> Scan</Text>
               </TouchableOpacity>
 
 
@@ -282,29 +319,36 @@ console.log(error);
                 onValueChange={(itemValue, itemIndex) =>
                   this.setState({ language: itemValue, Doc: itemValue })}
               >
-                <Picker.Item label="Sélectionner le nom du document" value="init" />
-                <Picker.Item label="Contrat signé" value="contrat" />
-                <Picker.Item label="Statut de la société" value="status" />
-                <Picker.Item label="CNI recto" value="cnir" />
-                <Picker.Item label="CNI Verso" value="cniv" />
-                <Picker.Item label="DFE ou patente" value="DFE" />
+                <Picker.Item label="Select the document name" value="init" />
+                <Picker.Item label="Signed contract" value="contrat" />
+                <Picker.Item label="Status of the company" value="status" />
+                <Picker.Item label="ID front" value="cnir" />
+                <Picker.Item label="ID Back" value="cniv" />
+                <Picker.Item label="photo of the person with the card ID" value="cniP" />
+                <Picker.Item label="DFE or patent" value="DFE" />
                 <Picker.Item label="N° RCCM" value="rccm" />
-                <Picker.Item label="Quittance loyer / Facture d'électricité / Facture d'eau" value="quitance" />
+                <Picker.Item label="Rent receipt / Electricity bill / Water bill" value="quitance" />
               </Picker>
 
               <Button
                 full
-                style={{ marginBottom: 12, marginHorizontal: 20 }}
+
+                style={styles.btnSection2}
                 onPress={() => this.Suivant(navigation)}
               >
-                <Text button>Suivant</Text>
+                <Text  button>Next</Text>
+                           
+               
               </Button>
 
+              {this.renderloader()}
+              <Text style={{ marginHorizontal: 170 }} > Submit ...</Text> 
+          
             </View>
 
-
+          
           </View>
-
+         
 
 
         </SafeAreaView>
@@ -314,6 +358,17 @@ console.log(error);
   
 };
 const styles = StyleSheet.create({
+
+  container: {
+    flex: 1,
+    justifyContent: "center"
+  },
+  horizontal: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    padding: 10
+  },
+
   scrollView: {
     backgroundColor: Colors.lighter,
   },
@@ -353,6 +408,16 @@ const styles = StyleSheet.create({
     borderRadius: 3,
     marginBottom: 10
   },
+  btnSection2: {
+    width: 225,
+    height: 50,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#DCDCDC',
+    borderRadius: 3,
+    marginBottom: 10,
+     marginHorizontal: 95
+  },
   btnText: {
     textAlign: 'center',
     color: 'gray',
@@ -361,6 +426,11 @@ const styles = StyleSheet.create({
   }
 }); 
 /*
+
+              {this.renderloader()}
+              <Text style={{ marginHorizontal: 170 }} > Saving ...</Text> 
+              
+              
 import React, { Component } from 'react';
 import {
   StyleSheet,
@@ -368,7 +438,7 @@ import {
   StatusBar,
   Dimensions,
   TouchableOpacity
-} from 'react-native';
+} from 're/*act-native';
 import Camera from 'react-native-camera';
 import { Icon } from 'native-base';
 import { dirPicutures } from './dirStorage';

@@ -107,9 +107,9 @@ class Register extends Component {
             User.pays = this.state.pays
 
         if (this.state.fullName == "" || this.state.last_name == "" || this.state.phone == "" || this.state.password == "") {
-            Toast.show('Veuillez verifier si les champs sont bien remplis');
+            Toast.show('Please check if the fields are filled in correctly');
         }else if(this.state.confpassword !== this.state.password){
-            Toast.show('les mots de passe saisis ne sont pas identiques ');
+            Toast.show('the passwords entered are not identical');
         }else {
 
 
@@ -120,12 +120,11 @@ class Register extends Component {
                 collection.phone = this.state.phone,
                 collection.password = this.state.password,
                 collection.pays = this.state.pays
-            axios({
-                method: 'post',
-                url: 'https://assurtous.ci:50970/register',
-                data: collection
-            })
-    
+                axios({
+                    method: 'post',
+                    url: 'http://192.168.43.218:3000/register',
+                    data: collection
+                })
                 .then(function (response) {
     
                     if (response.data.message == "l\'utilisateur a été crée avec succes") {
@@ -147,37 +146,38 @@ class Register extends Component {
                     //  console.log();
                 })
                 .catch(function (error) {
-                    console.log(error);
+                     AsyncStorage.getItem('PosUser', (err, result) => {
+
+                        result=JSON.parse(result)
+                        if (result !== null) {
+        
+                            console.log(result)
+                            if (result.phone == User.phone) {
+                                Toast.show('Vous êtes déja enregistré');
+                            } else {
+                               
+                                AsyncStorage.setItem('PosUser', JSON.stringify(User));
+                                navigation.navigate("Login");
+                                Toast.show('Veuillez saisir vos identifiants pour vous connecter');
+                           
+                            }
+        
+        
+                        } else {
+                            console.log(result)
+                            AsyncStorage.setItem('PosUser', JSON.stringify(User));
+                            navigation.navigate("Login");
+                            Toast.show('Veuillez saisir vos identifiants pour vous connecter');
+                       
+                        }
+        
+        
+                    });
                 });
 
             // AsyncStorage.removeItem('PosUser')
 
-        /*    await AsyncStorage.getItem('PosUser', (err, result) => {
-
-                result=JSON.parse(result)
-                if (result !== null) {
-
-                    console.log(result)
-                    if (result.phone == User.phone) {
-                        Toast.show('Vous êtes déja enregistré');
-                    } else {
-                    
-
-                      
-
-                       
-                    }
-
-
-                } else {
-                    console.log(result)
-                    AsyncStorage.setItem('PosUser', JSON.stringify(User));
-                    navigation.navigate("Login");
-                    Toast.show('Veuillez saisir vos identifiants pour vous connecter');
-                }
-
-
-            });*/
+         
         }
 
         // example console.log result:
@@ -204,7 +204,7 @@ class Register extends Component {
             collection.pays = this.state.pays
         axios({
             method: 'post',
-            url: 'https://assurtous.ci:50970/register',
+            url: 'http://192.168.43.218:3000/register',
             data: collection
         })
 
@@ -265,9 +265,12 @@ class Register extends Component {
                                 </Block >
                             <Block flex={2.5} center>
                                 < Text h3 style={
-                                    { marginBottom: 6 }} >
-                                    Enregistrement </Text>
-                                <Text paragraph color="black3"> Veuillez vous enregistrer pour démarrer.
+                                    { marginBottom: 6, marginHorizontal:40 }} >
+                                    Sales Representative </Text>
+                                    < Text h3 style={
+                                    { marginBottom: 6, marginHorizontal:40 }} >
+                                    registration  </Text>
+                                <Text paragraph color="black3"> Please register to get started.
                                          </Text>
                                 <Block style={{ marginTop: 14 }}>
 
@@ -275,25 +278,26 @@ class Register extends Component {
 
                                         <Input full
                                             
-                                            label="Nom"
+                                            label=" Last name"
                                             onChangeText={
                                                 (text) => this.register(text, 'fullName')}
-                                            placeholder="Nom"
+                                            placeholder=" Last name"
                                             style={{ marginBottom: 10, height: 40, width: 170 }
                                             } />
                                         < Input
                                             full
-                                            label="Prenom"
+                                            label="First name"
                                             onChangeText={
                                                 (text) => this.register(text, 'last_name')
                                             }
-                                            placeholder="Prénom"
+                                            placeholder="First name"
                                             style={
                                                 { marginBottom: 10, height: 40, width: 180 }
                                             } />
                                     </View >
 
-                                    <Input full email label="Adresse Email"
+                                    <Input full email label="
+                                            E-mail address"
                                         onChangeText={
                                             (text) => this.register(text, 'email')
                                         }
@@ -302,18 +306,18 @@ class Register extends Component {
                                             { marginBottom: 10 }
                                         }
                                     />
-                                    <Input full number label="Numero de Telephone"
+                                    <Input full number label="Phone number"
                                         onChangeText={
                                             (text) => this.register(text, 'phone')
                                         }
-                                        placeholder="Saisissez votre numéro de téléphone"
+                                        placeholder="Enter your phone number"
                                         style={
                                             { marginBottom: 10 }
                                         }
                                             />
                                             <Input full 
-                                             label="pays"
-                                            placeholder="Saisissez le nom du pays"
+                                             label="Country"
+                                            placeholder="Enter the name of the country"
                                             onChangeText={
                                                 (text) => this.register(text, 'pays')
                                             }
@@ -322,7 +326,7 @@ class Register extends Component {
                                             }
                                             />
 
-                                    <Input full password label="mot de passe"
+                                    <Input full password label="password"
                                         placeholder="XX XX XX XX XX"
                                         onChangeText={
                                             (text) => this.register(text, 'password')
@@ -331,7 +335,7 @@ class Register extends Component {
                                             { marginBottom: 10 }
                                         }
                                     />
-                                    <Input full password label=" confirmez le mot de passe"
+                                    <Input full password label="Confirm the password"
                                         placeholder="XX XX XX XX XX"
                                         onChangeText={
                                             (text) => this.register(text, 'confpassword')
@@ -347,15 +351,17 @@ class Register extends Component {
                                         onPress={
                                             () => this.submit(navigation)
                                         } >
-                                        <Text button> Enregistrer </Text>
+                                        <Text button>Register</Text>
                                     </Button>
                                     <Text paragraph color="gray" >
-                                        Avez-vous déjà un compte ? <Text height={18}
+                                       
+                                        Do you already have an account ? <Text height={18}
                                             color="blue"
                                             onPress={
                                                 () => navigation.navigate('Login')
                                             } >
-                                            Se connecter </Text>
+                                            
+                                        Sign in</Text>
                                     </Text>
                                 </Block>
                             </Block>

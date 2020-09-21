@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
-import { Image, KeyboardAvoidingView, Dimensions,FormValidationMessage,TouchableOpacity, SafeAreaView, ScrollView } from 'react-native';
+import { Image, KeyboardAvoidingView, Dimensions,FormValidationMessage,TouchableOpacity, SafeAreaView, ScrollView,ActivityIndicator, StyleSheet,View} from 'react-native';
 import Toast from 'react-native-simple-toast';
 import axios from 'axios';
-import AsyncStorage from '@react-native-community/async-storage'
+import AsyncStorage from '@react-native-community/async-storage';
 
 
 import { Button, Block, Text, Input} from '../components';
@@ -20,7 +20,8 @@ class Login extends Component{
         email :'',
         phone :'',
         password :'' ,
-        collection:''
+        collection:'',
+        loader:false
        
     }
    
@@ -39,47 +40,143 @@ class Login extends Component{
 
   }
 
+  userSync = async (navigation) => {
+
+ 
+    AsyncStorage.getItem('PosUser', (err, result) => {
+
+      result=JSON.parse(result)
+      if(result !== null) {
+        console.log(result)
+        axios({
+          method: 'post',
+          url: 'http://192.168.43.218:3000/register',
+          data: result
+      })
+      .then(function (response) {
+
+          if (response.data.message == "user has been created successfully") {
+
+              
+              navigation.navigate("Login");
+              AsyncStorage.setItem('PosUser', JSON.stringify(User));
+          } else if (response.data.message == "user already exists") {
+
+           //   Toast.show('l\'utilisateur existe déja');
+              navigation.navigate("Overview");
+          } else {
+            
+              navigation.navigate("Register");
+          }
+
+      })
+      .catch(function (error) {
+         
+      });
+          
+
+
+      } else {
+          Toast.show('Please enter your login details to log in');
+     
+      }
+
+
+  });
+       
+            
+
+        // AsyncStorage.removeItem('PosUser')
+
+     
+  
+
+    // example console.log result:
+    // ['@MyApp_user', '@MyApp_key']
+    /* try{
+        const value = await AsyncStorage.getItem('collection');
+       if (collection !== null) {
+            // We have data!!
+            console.log(JSON.parse(collection));
+        }
+    }catch (error) {
+        // Error retrieving data
+    }*/
+}
+
  submit= async(navigation)=> {
- /* let User={}
-  User.email=this.state.email,
-  User.phone=this.state.phone,
-  User.password=this.state.password
-*/
+
+  
 
   let collection={}
   collection.email=this.state.email,
   collection.phone=this.state.phone,
   collection.password=this.state.password
+  let load={}
+    load.loader=this.state.loader
+  
  if(collection.phone==""){
-  Toast.show('le champ MAIL/TELEPHONE/IDENTIFIANT est vide')
+  Toast.show('the MAIL / TELEPHONE / IDENTIFIANT field is empty')
  }else if(collection.password=="" && collection.phone==""){
-  Toast.show('les champs EMAIL/TELEPHONE/IDENTIFIANT et MOT DE PASSE sont vides')
+  Toast.show('the EMAIL / TELEPHONE / IDENTIFIER and PASSWORD fields are empty')
  }else if(collection.password==""){
-  Toast.show('le champ MOT DE PASSE  est vide')
+  Toast.show(' the PASSWORD field is empty')
  }else{
+  load.loader=true
   axios ({
     method: 'post',
-    url:  'https://assurtous.ci:50970/login',
+    url:  'http://192.168.43.218:3000/login',
     data: collection
   })
   .then(function (response) {
     console.log(response)
     if(response.data.error =="no user"){
-
-      Toast.show('l\'utilisateur n\'existe pas');
-
+      console.log(response.data)
+      Toast.show('The user does not exist');
+      load.loader=false
       //console.log(response.data.error)
     }else if(response.data.message =="validate"){
       console.log(response.data)
       Toast.show('validate');
+      load.loader=false
+      AsyncStorage.setItem('PosUser', JSON.stringify(collection));
        navigation.navigate('Overview',{phone:collection.phone});
     }
   })
 
   .catch(function (error) {
-    console.log(error);
+    load.loader=true
+      AsyncStorage.getItem('PosUser', (err, result) => {
+      result=JSON.parse(result)
+      
+       
+         if(result !== null){
+           //console.log(result)
+           console.log(collection)
+              if(result.phone == collection.phone && result.password == collection.password){
+               
+                load.loader=false
+            navigation.navigate("Overview");
+            Toast.show('welcome');
+          
+          }else if (result.email == collection.phone && result.password == collection.password){
+            load.loader=false
+               
+            navigation.navigate("Overview");
+            Toast.show(' welcome');
+          }else{
+           Toast.show('Incorrect IDs');
+           load.loader=false
+          }
+         }else{
+           Toast.show('Please Register or Login to make your first connection');
+           load.loader=false
+          }
+        });
   });
  }
+
+
  
  // AsyncStorage.removeItem('PosUser')
 /*
@@ -135,6 +232,19 @@ class Login extends Component{
   } */
 
 
+  renderloader(){
+    if(this.state.loader==true){
+      return  <View style={[styles.container, styles.horizontal]}>
+          <ActivityIndicator size="large" color="#00ff00" />
+        </View>
+    }
+  }
+
+  componentDidMount(){
+   this.userSync();
+  }
+
+
   render() {
     const { navigation } = this.props;
 
@@ -148,6 +258,7 @@ class Login extends Component{
         style={{ flex: 1 }}
         keyboardVerticalOffset={height * 0.2}
       >
+       {this.renderloader()}
         <Block center middle style={{paddingtop:30}}>
           <Block middle>
             <Image
@@ -159,10 +270,10 @@ class Login extends Component{
          
           <Block flex={2.5} center>
             <Text h3 style={{ marginBottom: 6 }}>
-              Connexion
+            SIGN IN
             </Text>
             <Text paragraph color="black3">
-            Veuillez vous connecter pour démarrer.
+              Please Sign in to get started.
             </Text>
 
             <Block center style={{ marginTop: 44 }}>
@@ -170,8 +281,8 @@ class Login extends Component{
               <Input
                 full
                 text
-                placeholder="Email ou Numéro de téléphone ou Identifiant"
-                label="Email/numero de telephone/Identifiant"
+                placeholder="Email or Phone number or Username"
+                label="Email / phone number / Username"
                 onChangeText={(text)=>this.connexion(text,'phone')}
                 style={{ marginBottom: 25 }}
               />
@@ -179,7 +290,7 @@ class Login extends Component{
               <Input
                 full
                 password
-                label="Mot de passe"
+                label="Password"
                 onChangeText={(text)=>this.connexion(text,'password')}
                 style={{ marginBottom: 25 }}
                  ref={ inmdp => this.inputmdp = inmdp }
@@ -190,7 +301,7 @@ class Login extends Component{
                     color="gray"
                     onPress={() => navigation.navigate('Forgot')}
                   >
-                    MOT DE PASSE OUBLIE?
+                    FORGOT YOUR PASSWORD?
                   </Text>
                 }
               />
@@ -202,15 +313,16 @@ class Login extends Component{
                 onPress={()=>this.submit(navigation)}
               // onPress={() => navigation.navigate('Overview')}
               >
-                <Text button>Connexion</Text>
+                <Text button>Sign in</Text>
+                
               </Button>
               <Text paragraph color="gray">
-              Vous ne pas disposez de compte? <Text
+              Don't have an account? <Text
                   height={18}
                   color="blue"
 
-                onPress={() => navigation.navigate('Register')}>
-                     S'enregistrer
+                onPress={() => navigation.navigate('Register')}> 
+                Register
                 </Text>
               </Text>
             </Block>
@@ -224,6 +336,22 @@ class Login extends Component{
       </SafeAreaView>
     )
   }
-}
+
+
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: "center"
+  },
+  horizontal: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    padding: 10
+  }
+});
+
+
 
 export default Login;

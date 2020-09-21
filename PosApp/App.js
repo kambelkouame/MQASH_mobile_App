@@ -5,13 +5,13 @@ import {
   View 
 } from 'react-native';
 
-
 import AppNavigator from "./navigation/AppNavigator";
 
 export default class App extends React.Component{
 
   state = {
-    isLoadingComplete: false
+    isLoadingComplete: false,
+    
   };
 
   render(){

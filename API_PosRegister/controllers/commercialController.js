@@ -15,7 +15,7 @@ router.post('/register', (req, res) => {
 
 
 function insertCommercial(req, res) {
-   if(req.body.fullName==''|| req.body.last_name=='' || req.body.email=='' || req.body.phone=='' || req.body.password==''||req.body.pays=='' ){
+   if(req.body.fullName==''){
          res.jsonp({message:' Veillez vous Assurer que tous les champs sont bien remplis'})
     }else{
 
@@ -65,7 +65,7 @@ Commercial.findOne({phone: req.body.phone, password: req.body.password})
        
         }
 
-           res.cookie("info", infouser)
+        res.cookie("info", infouser)
             
              
        res.jsonp({message: 'validate'})

@@ -77,21 +77,21 @@ constructor(){
 
       collection={}
       collection.fullName=this.state.fullName,
-      collection.email="any@any.com",
+      collection.email=this.state.nomCommercial+"any@any.com",
       collection.pays="any",
       collection.ville="any",
       collection.telephone=this.state.telephone,
       collection.adresse=this.state.adresse,
       collection.nomCommercial=this.state.nomCommercial,
       collection.rccm="any",
-       collection.agentTerrain=res.phone,
-       collection.typePos="POS",
-       collection.id_dis=this.state.id,
-       collection.identifiant='MQash-Dis'+Date.now()
+      collection.agentTerrain=res.phone,
+      collection.typePos="POS",
+      collection.id_dis=this.state.id,
+      collection.identifiant='MQash-Dis'+Date.now()
 
     axios({
       method: 'post',
-      url:  'https://assurtous.ci:50970/dis',
+      url:  'http://192.168.43.218:3000/dis',
       data: collection
     })
     .then(function (response) {
@@ -110,7 +110,30 @@ constructor(){
        
     })  
     .catch(function (error) {
-      console.log(error);
+      
+    AsyncStorage.getItem('Dis', (err, result) => {
+      if (result !== null) {
+       
+        console.log(result)
+        if(result.nomCommercial==collection.nomCommercial){
+          Toast.show('Vous êtes déja enregistré');
+        }else{
+         
+        AsyncStorage.setItem('Dis', result +',' + JSON.stringify(collection));
+        Toast.show('le POS à été enregistré avec succes');
+      
+        }
+       
+     }else {
+           
+       AsyncStorage.setItem('Dis', JSON.stringify(collection));
+       Toast.show('le POS à été enregistré avec succes');
+      
+        
+     }
+    
+  
+    })
     });
     this.setState({
        typePos: 'init',
@@ -211,7 +234,7 @@ constructor(){
             <Block row space="between" style={{ marginTop: 25 }}>
               <Block>
             
-              <Text center h3 regular  color="white">ENREGISTRER LES POS</Text>
+              <Text center h3 regular  color="white">Register a POS</Text>
               </Block>
             </Block>
           </Card>
@@ -228,18 +251,18 @@ constructor(){
               <Input
               full
               text
-              label="Nom commercial "
+              label="Trade name"
               value={this.state.nomCommercial}
-               placeholder="Nom commercial"
+               placeholder="Trade name"
                onChangeText={(text)=>this.register(text,'nomCommercial')}
               style={{ marginBottom: 10,height: 40  }}
             />
              <Input
               full
               Text
-              label="Nom et prénom du gérant"
+              label="Name and first name of the manager"
               value={this.state.fullName}
-               placeholder="Nom et prénom du gérant"
+               placeholder="Name and first name of the manager"
                onChangeText={(text)=>this.register(text,'fullName')}
               style={{ marginBottom: 10,height: 40}}
             />
@@ -248,9 +271,9 @@ constructor(){
               full
               number
                value={this.state.telephone}
-              label="Numero telephone"
+              label="Phone number"
               onChangeText={(text)=>this.register(text,'telephone')}
-               placeholder="Numéro télephone"
+               placeholder="Phone number"
               style={{ marginBottom: 10,height: 40 }}
             />
             </Block>
@@ -260,8 +283,8 @@ constructor(){
               <Input
                 full
                 text
-                label="Localisation"
-                placeholder="Saisissez la localisation "
+                label="Location"
+                placeholder="Enter a location "
                  value={this.state.adresse}
                  onChangeText={(text)=>this.register(text,'adresse')}
                 style={{ marginBottom: 10 ,height: 40}}
@@ -273,7 +296,7 @@ constructor(){
                         color="#6281C0" 
                         
                       >
-                        <Text button>Choisir la géolocalisation</Text>
+                        <Text button>Choose geolocation</Text>
                           </Button>
 
              
@@ -285,7 +308,7 @@ constructor(){
                 color="#6281C0" 
                 onPress={()=>this.submit(navigation)}
               >
-                <Text button>Valider</Text>
+                <Text button>Submit</Text>
               </Button>
  
               

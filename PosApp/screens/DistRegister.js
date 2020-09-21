@@ -129,10 +129,10 @@ class DistRegister extends Component {
     collection.agentTerrain=res.phone,
     collection.typePos=this.state.typePos,
    collection.identifiant='MQash-Dis'+Date.now()
-   
+   console.log(collection)
      axios({
       method: 'post',
-      url:  'https://assurtous.ci:50970/dis',
+      url:  'http://192.168.43.218:3000/dis',
       data: collection
     })
     .then(function (response) {
@@ -153,10 +153,36 @@ class DistRegister extends Component {
        
     })  
     .catch(function (error) {
-      console.log(error);
+      
+      AsyncStorage.getItem('Dis', (err, result) => {
+        if (result !== null) {
+         
+          console.log(result)
+          if(result.nomCommercial==collection.nomCommercial){
+            Toast.show('le point de vente est déja enregistré');
+          }else{
+           
+          // AsyncStorage.setItem('PosUser', JSON.stringify(User));
+          AsyncStorage.setItem('Dis', result +',' + JSON.stringify(collection));   
+          navigation.navigate("Camera",{typePos:collection.typePos,id:collection.nomCommercial});
+            
+          }
+         
+       }else {
+             
+         AsyncStorage.setItem('Dis', JSON.stringify(collection));
+         Toast.show('Vous avez bien enregistré le Distributeur!!'); 
+         navigation.navigate('Camera',{id:collection.nomCommercial,typePos:collection.typePos});
+      
+          }
+     });
+
+    
+      
+   
     });
     this.setState({
-       typePos: 'init',
+      
        nomCommercial :'',
         fullName:'',
         telephone:'',
@@ -324,7 +350,7 @@ class DistRegister extends Component {
             <Block row space="between" style={{ marginTop: 25 }}>
               <Block>
             
-     <Text center h3 regular  color="white">Master distributeur  </Text>
+     <Text center h3 regular  color="white">Master Distributor  </Text>
               </Block>
             </Block>
           </Card>
@@ -341,9 +367,9 @@ class DistRegister extends Component {
                         selectedValue={this.state.language}  
                         onValueChange={(itemValue, itemIndex) =>  
                             this.setState({language: itemValue, typePos: itemValue})}>  
-                    <Picker.Item label="Selectionner le Type de POS" value="init" />  
-                    <Picker.Item label="POS indépendant" value="PosInd" />  
-                    <Picker.Item label="Master distributeur" value="Dis" />  
+                    <Picker.Item label="Select the Type of POS" value="init" />  
+                    <Picker.Item label="Independent POS" value="PosInd" />  
+                    <Picker.Item label="Master Distributor" value="Dis" />  
                 </Picker>  
               
             </View> 
@@ -351,9 +377,9 @@ class DistRegister extends Component {
 
              <Input
               full
-              label="Nom commercial "
+              label="Trade name "
               value={this.state.nomCommercial}
-               placeholder="Nom commercial"
+               placeholder="Trade name"
                onChangeText={(text)=>this.register(text,'nomCommercial')}
               style={{ marginBottom: 10,height: 40  }}
             />
@@ -362,9 +388,9 @@ class DistRegister extends Component {
             <Input
               full
               text
-              label="Nom et prénom du gérant"
+              label="Name and first name of the manager"
               value={this.state.fullName}
-               placeholder="Nom et prénom du gérant"
+               placeholder="Name and first name of the manager"
                onChangeText={(text)=>this.register(text,'fullName')}
               style={{ marginBottom: 10,height: 40}}
             />
@@ -373,15 +399,15 @@ class DistRegister extends Component {
               full
               number
                value={this.state.telephone}
-              label="Numero telephone"
+              label="Phone number"
               onChangeText={(text)=>this.register(text,'telephone')}
-               placeholder="Numéro téléphone "
+               placeholder="Phone number"
               style={{ marginBottom: 10,height: 40 }}
             />
               <Input
               full
               text
-              label="Email"
+              label="E-mail"
               value={this.state.email}
               onChangeText={(text)=>this.register(text,'email')}
                placeholder="Ex: email@email.email "
@@ -390,10 +416,10 @@ class DistRegister extends Component {
 
               <Input
               full
-              label="Pays"
+              label="Country"
               value={this.state.pays}
               onChangeText={(text)=>this.register(text,'pays')}
-               placeholder="Pays"
+               placeholder="Country"
               style={{ marginBottom: 10,height: 40 }}
             />
           
@@ -404,9 +430,9 @@ class DistRegister extends Component {
              <Input
                 full
                 text
-                label="Ville"
+                label="City"
                  value={this.state.ville}
-                 placeholder="Ville"
+                 placeholder="City"
                  onChangeText={(text)=>this.register(text,'ville')}
                 style={{ marginBottom: 10 ,height: 40}}
               />
@@ -414,8 +440,8 @@ class DistRegister extends Component {
               <Input
                 full
                 text
-                label="Adresse"
-                 placeholder="EX: Commune,Quartier-Rue n°"
+                label="Address"
+                 placeholder="EX:Municipality, District-Street n °"
                  value={this.state.adresse}
                  onChangeText={(text)=>this.register(text,'adresse')}
                 style={{ marginBottom: 10 ,height: 40}}
@@ -424,8 +450,8 @@ class DistRegister extends Component {
               <Input
                 full
                 text
-                label="N° de registre de commerce"
-                 placeholder="N° de registre de commerce"
+                label="Commercial registered name"
+                 placeholder="Commercial registered name"
                 value={this.state.rccm}
                  onChangeText={(text)=>this.register(text,'rccm')}
                 style={{ marginBottom: 10 ,height: 40}}
@@ -439,7 +465,7 @@ class DistRegister extends Component {
                 color="#6281C0" 
                 onPress={()=>this.submit(navigation)}
               >
-                <Text button>Valider</Text>
+                <Text button>Submit</Text>
               </Button>
              
             </Block>
